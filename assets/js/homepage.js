@@ -1,52 +1,56 @@
-  var userFormEl = document.querySelector("#user-form");
-  var nameInputEl = document.querySelector("#username");
-  var repoContainerEl = document.querySelector("#repos-container");
-  var repoSearchTerm = document.querySelector("#repo-search-term");
-  
-  var getUserRepos = function(user) {
-    // format the github api url
-    var apiUrl = "https://api.github.com/users/" + user + "/repos";
-  
-    // make a get request to url
-    fetch(apiUrl).then(function(response) {
-      // request was successful 
+var userFormEl = document.querySelector('#user-form');
+var nameInputEl = document.querySelector('#username');
+var repoContainerEl = document.querySelector('#repos-container');
+var repoSearchTerm = document.querySelector('#repo-search-term');
+
+var formSubmitHandler = function(event) {
+  // prevent page from refreshing
+  event.preventDefault();
+
+  // get value from input element
+  var username = nameInputEl.value.trim();
+
+  if (username) {
+    getUserRepos(username);
+
+    // clear old content
+    repoContainerEl.textContent = '';
+    nameInputEl.value = '';
+  } else {
+    alert('Please enter a GitHub username');
+  }
+};
+
+var getUserRepos = function(user) {
+  // format the github api url
+  var apiUrl = 'https://api.github.com/users/' + user + '/repos';
+
+  // make a get request to url
+  fetch(apiUrl)
+    .then(function(response) {
+      // request was successful
       if (response.ok) {
+        console.log(response);
         response.json().then(function(data) {
+          console.log(data);
           displayRepos(data, user);
         });
-      }
-      else {
-        alert("error: GitHub User Not Found")
+      } else {
+        alert('Error: ' + response.statusText);
       }
     })
     .catch(function(error) {
-      //notice this'.catch() getting chained onto the end of the '.then() method
-      alert("unable to connect to GitHub");
+      alert('Unable to connect to GitHub');
     });
-  };
-
-
-  var formSubmitHandler = function(event) {
-      event.preventDefault();
-      //get value form input element
-      var username = nameInputEl.value.trim();
-
-      if (username) {
-          getUserRepos(username);
-          nameInputEl.value="";
-      } else {
-          alert("Please enter a GitHub username");
-      }
-  };
+};
 
 var displayRepos = function(repos, searchTerm) {
-  //check if api returned any repos
+  // check if api returned any repos
   if (repos.length === 0) {
-    repoContainerEl.textContent = "No repositories found.";
+    repoContainerEl.textContent = 'No repositories found.';
+    return;
   }
-  
-  // clear old content
-  repoContainerEl.textContent = "";
+
   repoSearchTerm.textContent = searchTerm;
 
   // loop over repos
@@ -83,6 +87,7 @@ var displayRepos = function(repos, searchTerm) {
     // append container to the dom
     repoContainerEl.appendChild(repoEl);
   }
-}
+};
 
-  userFormEl.addEventListener("submit", formSubmitHandler);
+// add event listeners to forms
+userFormEl.addEventListener('submit', formSubmitHandler);
